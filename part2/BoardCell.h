@@ -1,6 +1,6 @@
 template<CellType cell_type, Direction direction, int len_vehicle>
 struct BoardCell {
     CellType type = cell_type;
-    Direction direction = directiob;
+    Direction direction = direction;
     int length = len_vehicle;
 };
