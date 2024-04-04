@@ -24,27 +24,25 @@ struct Find_Car_Helper{
     static constexpr bool last_row = (mainList::size == curr_row + 1);
 
     static constexpr bool found = (curr_type == type);
-    static constexpr bool last_cell_in_board = (last_row && (curr_col == mainList::head::size + 1));
+    static constexpr bool last_cell_in_board = (last_row && (curr_col == 0));
 
     static_assert(!(!found && last_cell_in_board), "Type was not found!");
 
     static constexpr int next_row = ConditionalInteger<last_row, 0, curr_row + 1>; // this is the next cell's row
      
-    static constexpr int next_col = ConditionalInteger<last_row, curr_col + 1, curr_col>; // this is the next cell's column
+    static constexpr int next_col = ConditionalInteger<last_row, curr_col - 1, curr_col>; // this is the next cell's column
 
     typedef typename GetAtIndex<next_row, mainList> next_row_list;
     typedef typename GetAtIndex<next_col, next_row_list> next_cell;
-    typedef Find_Car_Helper<type, next_cell, next_row, next_col, found, mainList> next_helper;
+    typedef Find_Car_Helper<type, next_cell::type, next_row, next_col, found, mainList> next_helper;
 
     static constexpr int X_row = ConditionalInteger<found, curr_row, next_helper::X_row >::value;
     static constexpr int X_col = ConditionalInteger<found, curr_col, next_helper::X_col >::value;
 };
 
 // Find_Car_Helper Specialization - stopping condition
-template </*/COMPLETE/*/>
-struct Find_Car_Helper</*/COMPLETE/*/>{
-    /*/COMPLETE/*/
-};
+template <CellType type, CellType curr_type, int curr_row, int curr_col, typename board_main_list>
+struct Find_Car_Helper<type, curr_type, curr_row, curr_col, true, board_main_list> {};
 
 // FindCar Class Declaration
 // (uses Find_Car_Helper to find car "type" in board "Bo" - read Find_Car_Helper for more info)
@@ -54,29 +52,48 @@ struct FindCar{
     typedef typename game_board::board mainList;
     static constexpr int last_col_idx = mainList::head::size - 1;
 
-    typedef typename /*/COMPLETE/*/ first_cell;
+    typedef typename mainList::head::head first_cell;
 
-    typedef Find_Car_Helper<type,first_cell::type,0,last_col_idx,false,mainList> car_loc;
+    typedef Find_Car_Helper<type, first_cell::type, 0, last_col_idx, false, mainList> car_loc;
     static constexpr int X_row_idx = car_loc::X_row;
     static constexpr int X_col_idx = car_loc::X_col;
 };
 
 // Dir Class Declaration
-// This class computes the further end of a car respect to "c" given the end found using FindCar.
-// (e.g. if "c"=RIGHT, the further end of the car is the left end...)
+// This class computes the further end of a car respect to "car_direction" given the end found using FindCar.
+// (e.g. if "car_direction"=RIGHT, the further end of the car is the left end...)
 // c - a direction
 // (Ro, Col) - a random end of the car
 // len - the car's length
-template<Direction c,int Ro,int Col,int len>
+template<Direction car_direction, int Ro, int Col, int len>
 struct Dir{};
 
 // Dir Specialization (you need to implement more specializations similarly)
-template< int Ro,int Col,int len>
-struct Dir<RIGHT,Ro,Col,len> {
-    static constexpr int row_i=/*/COMPLETE/*/;
-    static constexpr int col_i=/*/COMPLETE/*/;
+template<int Ro, int Col, int len>
+struct Dir<RIGHT, Ro, Col, len> {
+    static constexpr int row_i = Ro;
+    static constexpr int col_i = Col - len + 1;
 };
 
+template<int Ro, int Col, int len>
+struct Dir<LEFT, Ro, Col, len> {
+    static constexpr int row_i = Ro;
+    static constexpr int col_i = Col - len + 1;
+};
+
+template<int Ro, int Col, int len>
+struct Dir<UP, Ro, Col, len> {
+    static constexpr int row_i = Ro - len + 1;
+    static constexpr int col_i = Col;
+};
+
+template<int Ro, int Col, int len>
+struct Dir<DOWN, Ro, Col, len> {
+    static constexpr int row_i = Ro - len + 1;
+    static constexpr int col_i = Col;
+};
+
+/*******************************************  TODO from here ****************************************************/
 
 // direct Class Declaration
 // This class recursively moves a car "Am" steps on the board in a certain direction
@@ -85,26 +102,26 @@ struct Dir<RIGHT,Ro,Col,len> {
 // myL - main list of the board
 // my_cell - a cell on the current board containing the car to be moved
 // (Ro, Co) - coordinates of the further end of the car respect to "d" (e.g. if "d"=RIGHT, the further end of the car is the left end...)
-template<Direction d,int counter,typename myL,typename my_cell,int Co,int Ro>
+template<Direction d, int counter, typename myL, typename my_cell, int Co, int Ro>
 struct direct{};
 
 // direct Specialization (you need to implement more specializations similarly)
-template<int counter,typename myL,typename my_cell,int Co,int Ro>
-struct direct<RIGHT,counter,myL,my_cell,Co, Ro>{
+template<int counter, typename myL, typename my_cell, int Co, int Ro>
+struct direct<RIGHT, counter, myL, my_cell, Co, Ro>{
     typedef typename /*/ COMPLETE using direct (recursive call) /*/ mainList; // main list of the board after we moved the car "count"-1 steps
-    typedef GetAtIndex<Ro,mainList> subList ;
+    typedef GetAtIndex<Ro, mainList> subList ;
     typedef typename /*/COMPLETE/*/ celli;  // this is the closer end (respect to "d") after the #"count" step
     typedef typename /*/COMPLETE/*/ to_celli; // this is the further end (respect to "d") before the #"count" step (after the #("count"-1) step)
     static_assert(/*/COMPLETE/*/, "Error,Collision cell MoveVehicle");
     typedef typename /*/COMPLETE/*/ first;
     typedef typename /*/COMPLETE (use first)/*/ second;
-    typedef typename SetAtIndex<Ro,second,mainList>::list LL;
+    typedef typename SetAtIndex<Ro, second, mainList>::list LL;
     typedef LL moved;
 };
 
 // direct Specialization (you need to implement more specializations similarly)
-template<typename myL,typename my_cell,int Co,int Ro>
-struct direct<RIGHT,0,myL,my_cell,Co, Ro> {
+template<typename myL, typename my_cell, int Co, int Ro>
+struct direct<RIGHT, 0, myL, my_cell, Co, Ro> {
     /*/COMPLETE/*/;
 };
 
@@ -114,12 +131,12 @@ struct MoveVehicle{};
 
 // MoveVehicle Specialization
 template<typename B, int R1, int C1, Direction Dl, int A>
-struct MoveVehicle<GameBoard<B>,R1,C1,Dl,A>{
+struct MoveVehicle<GameBoard<B>, R1, C1, Dl, A>{
 
     typedef GameBoard<B> PrevBoard;
     typedef typename PrevBoard::board mainList;
-    typedef GetAtIndex<R1,mainList> subList;
-    typedef GetAtIndex<C1,typename subList::value> cell;
+    typedef GetAtIndex<R1, mainList> subList;
+    typedef GetAtIndex<C1, typename subList::value> cell;
     typedef typename cell::value my_cell;
 
     static_assert(/*/COMPLETE/*/, "Error Row,Move");
@@ -127,13 +144,13 @@ struct MoveVehicle<GameBoard<B>,R1,C1,Dl,A>{
     static_assert(/*/COMPLETE/*/, "Error,empty cell MoveVehicle");
     static_assert(/*/COMPLETE/*/, "Error,direction cell MoveVehicle");
 
-    static constexpr int R2= FindCar<my_cell::type,PrevBoard>::X_row_idx;
-    static constexpr int C2= FindCar<my_cell::type,PrevBoard>::X_col_idx;
+    static constexpr int R2 = FindCar<my_cell::type, PrevBoard>::X_row_idx;
+    static constexpr int C2 = FindCar<my_cell::type, PrevBoard>::X_col_idx;
     // the further end:
-    static constexpr int R3= Dir<Dl,R2,C2,my_cell::length>::row_i;
-    static constexpr int C3= Dir<Dl,R2,C2,my_cell::length>::col_i;
+    static constexpr int R3 = Dir<Dl, R2, C2, my_cell::length>::row_i;
+    static constexpr int C3 = Dir<Dl, R2, C2, my_cell::length>::col_i;
 
-    typedef typename direct<Dl,A,B,my_cell,C3,R3>::moved o1;
+    typedef typename direct<Dl, A, B, my_cell, C3, R3>::moved o1;
     typedef GameBoard<o1> board;
 
 };
