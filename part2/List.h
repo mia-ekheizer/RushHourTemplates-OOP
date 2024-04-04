@@ -1,12 +1,21 @@
 
-template<typename Head, typename... Node>
+/*************            List             ****************/
+// declaration of the general case
+template<typename... Nodes>
 struct List {
-    typedef Head head;
-    typedef List<Node...> next;
-    int size = (sizeof...(Node)) + 1;
+    constexpr static int size = 0;
 };
 
-template<typename, typename>
+template<typename Head, typename... Nodes>
+struct List<Head, Nodes...> {
+    typedef Head head;
+    typedef List<Nodes...> next;
+    constexpr static int size = (sizeof...(Nodes)) + 1;
+};
+
+/*************            PrependList             ****************/
+// declaration of the general case
+template<typename Type, typename TypeList>
 struct PrependList {};
 
 template<typename Type, typename... TypeList>
@@ -14,36 +23,39 @@ struct PrependList<Type, List<TypeList...>> {
     typedef List<Type, TypeList...> list;
 };
 
+/*************            GetAtIndex             ****************/
 // declaration of the general case
 template<int N, typename TypeList>
 struct GetAtIndex {};
 
 // recursion for N > 0
-template<int N, typename TypeHead, typename... Node>
-struct GetAtIndex<N, List<TypeHead, Node...>> {
-    typedef typename GetAtIndex<N - 1, List<Node...>>::TypeHead value;  
+template<int N, typename TypeHead, typename... TypeList>
+struct GetAtIndex<N, List<TypeHead, TypeList...>> {
+    typedef typename GetAtIndex<N - 1, List<TypeList...>>::value value;  
 };
 
 // Specialization for N = 0
 // This is the base case for the recursion
-template<typename TypeHead, typename... Node>
-struct GetAtIndex<0, List<TypeHead, Node...>> {
+template<typename TypeHead, typename... TypeList>
+struct GetAtIndex<0, List<TypeHead, TypeList...>> {
     typedef TypeHead value;
 };
 
+/*************            SetAtIndex             ****************/
 // declaration of the general case
-template<int N, typename Type, typename... TypeList>
+template<int N, typename Type, typename TypeList>
 struct SetAtIndex {};
 
 // recursion for N > 0
-template<int N ,typename Type, typename TypeHead, typename... Node>
-struct SetAtIndex<N, Type, List<TypeHead, Node...>> {
-    typedef typename SetAtIndex<N - 1, Type, List<Node...>>::TypeHead list;
+template<int N ,typename Type, typename TypeHead, typename... TypeList>
+struct SetAtIndex<N, Type, List<TypeHead, TypeList...>> {
+    typedef typename SetAtIndex<N - 1, Type, List<TypeList...>>::list tmp_list;
+    typedef typename PrependList<TypeHead, tmp_list> list;
 };
 
 // Specialization for N = 0
 // Changing the value in the Nth node
-template<typename Type, typename TypeHead, typename... Node>
-struct SetAtIndex<0, Type, List<TypeHead, Node...>> {
-    typedef typename PrependList<Type, List<Node...>>::TypeHead list;
+template<typename Type, typename TypeHead, typename... TypeList>
+struct SetAtIndex<0, Type, List<TypeHead, TypeList...>> {
+    typedef typename PrependList<Type, List<TypeList...>>::list list;
 };
