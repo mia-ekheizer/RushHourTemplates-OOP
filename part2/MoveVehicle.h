@@ -14,29 +14,30 @@ using namespace std;
 // Find_Car_Helper Class Declaration
 // This class recursively iterates over the board's cells and finds the coordinates of a cell containing an end (the front or back) of the car "type" (note that the first end to be found depends on the direction of the search).
 // type - the car to find
-// type2 - the car on the current cell
-// (row, col) - the coordinates of the current cell
+// cyrr_type - the car on the current cell
+// (curr_row, curr_col) - the coordinates of the current cell
 // done - search is done
-// B - main list of the board
-template <CellType type, CellType type2, int row, int col, bool done, typename B>
+// board_main_list - main list of the board
+template <CellType type, CellType curr_type, int curr_row, int curr_col, bool done, typename board_main_list> 
 struct Find_Car_Helper{
-    typedef typename GameBoard<B>::board mainList;
-    static constexpr bool last_row = (mainList::size == row + 1);
+    typedef typename GameBoard<board_main_list>::board mainList;
+    static constexpr bool last_row = (mainList::size == curr_row + 1);
 
-    static constexpr bool found = /*/ COMPLETE /*/;
-    static constexpr bool last_cell_in_board = /*/ COMPLETE /*/;
+    static constexpr bool found = (curr_type == type);
+    static constexpr bool last_cell_in_board = (last_row && (curr_col == mainList::head::size + 1));
 
     static_assert(!(!found && last_cell_in_board), "Type was not found!");
 
-    static constexpr int next_row = /*/ COMPLETE using ConditionalInteger /*/; // this is the next cell's row
-    static constexpr int next_col = /*/ COMPLETE using ConditionalInteger /*/; // this is the next cell's column
+    static constexpr int next_row = ConditionalInteger<last_row, 0, curr_row + 1>; // this is the next cell's row
+     
+    static constexpr int next_col = ConditionalInteger<last_row, curr_col + 1, curr_col>; // this is the next cell's column
 
-    typedef typename /*/ COMPLETE using GetAtIndex /*/ next_row_list;
-    typedef typename /*/ COMPLETE using GetAtIndex /*/ next_cell;
-    typedef /*/ COMPLETE using Find_Car_Helper (recursive call) /*/ next_helper;
+    typedef typename GetAtIndex<next_row, mainList> next_row_list;
+    typedef typename GetAtIndex<next_col, next_row_list> next_cell;
+    typedef Find_Car_Helper<type, next_cell, next_row, next_col, found, mainList> next_helper;
 
-    static constexpr int X_row = ConditionalInteger<found, row, next_helper::X_row >::value;
-    static constexpr int X_col = ConditionalInteger<found, col, next_helper::X_col >::value;
+    static constexpr int X_row = ConditionalInteger<found, curr_row, next_helper::X_row >::value;
+    static constexpr int X_col = ConditionalInteger<found, curr_col, next_helper::X_col >::value;
 };
 
 // Find_Car_Helper Specialization - stopping condition

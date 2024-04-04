@@ -1,3 +1,5 @@
+#ifndef LIST_H
+#define LIST_H
 
 /*************            List             ****************/
 // declaration of the general case
@@ -59,3 +61,5 @@ template<typename Type, typename TypeHead, typename... TypeList>
 struct SetAtIndex<0, Type, List<TypeHead, TypeList...>> {
     typedef typename PrependList<Type, List<TypeList...>>::list list;
 };
+
+#endif // LIST_H
