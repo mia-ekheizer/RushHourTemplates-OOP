@@ -78,7 +78,7 @@ struct Dir<RIGHT, Row, Col, len> {
 template<int Row, int Col, int len>
 struct Dir<LEFT, Row, Col, len> {
     static constexpr int row_i = Row;
-    static constexpr int col_i = Col - len + 1;
+    static constexpr int col_i = Col;
 };
 
 template<int Row, int Col, int len>
@@ -89,7 +89,7 @@ struct Dir<UP, Row, Col, len> {
 
 template<int Row, int Col, int len>
 struct Dir<DOWN, Row, Col, len> {
-    static constexpr int row_i = Row - len + 1;
+    static constexpr int row_i = Row;
     static constexpr int col_i = Col;
 };
 
@@ -154,16 +154,16 @@ struct direct<LEFT, 0, mainBoardList, car_cell, Col, Row> {};
 
 template<int counter, typename mainBoardList, typename car_cell, int Col, int Row>
 struct direct<UP, counter, mainBoardList, car_cell, Col, Row>{
-    typedef typename TranposeList<mainBoardList>::matrix transposedBoard;
+    typedef typename Tranpose<mainBoardList>::matrix transposedBoard;
     typedef typename direct<LEFT, counter, transposedBoard, car_cell, Row, Col>::moved transposedBoardAfterMove;
-    typedef typename TranposeList<transposedBoardAfterMove>::matrix moved;
+    typedef typename Tranpose<transposedBoardAfterMove>::matrix moved;
 };
 
 template<int counter, typename mainBoardList, typename car_cell, int Col, int Row>
 struct direct<DOWN, counter, mainBoardList, car_cell, Col, Row>{
-    typedef typename TranposeList<mainBoardList>::matrix transposedBoard;
+    typedef typename Tranpose<mainBoardList>::matrix transposedBoard;
     typedef typename direct<RIGHT, counter, transposedBoard, car_cell, Row, Col>::moved transposedBoardAfterMove;
-    typedef typename TranposeList<transposedBoardAfterMove>::matrix moved;
+    typedef typename Tranpose<transposedBoardAfterMove>::matrix moved;
 };
 
 template<CellType Type, Direction Dir, int Amount>
@@ -186,12 +186,14 @@ struct MoveVehicle<GameBoard<B>, R1, C1, Dl, A>{
     typedef typename PrevBoard::board mainList;
     typedef GetAtIndex<R1, mainList> subList;
     typedef GetAtIndex<C1, typename subList::value> cell;
-    typedef typename cell::value my_cell;
+    typedef typename cell::value my_cell; //my_cell is of kind BoardCell
 
-    static_assert(/*/COMPLETE/*/, "Error Row,Move");
-    static_assert(/*/COMPLETE/*/, "Error column,Move");
-    static_assert(/*/COMPLETE/*/, "Error,empty cell MoveVehicle");
-    static_assert(/*/COMPLETE/*/, "Error,direction cell MoveVehicle");
+    static_assert(R1 >= 0 && R1 < PrevBoard::height, "Error Row,Move");
+    static_assert(C1 >=0 && C1 < PrevBoard::width, "Error column,Move");
+    static_assert(my_cell::type != EMPTY, "Error,empty cell MoveVehicle");
+    constexpr static bool is_horizontal = ((Dl == RIGHT || Dl == LEFT) && (my_cell::direction == RIGHT || my_cell::direction == LEFT));
+    constexpr static bool is_vertical = ((Dl == UP || Dl == DOWN) && (my_cell::direction == UP || my_cell::direction == DOWN));
+    static_assert(is_horizontal || is_vertical, "Error,direction cell MoveVehicle");
 
     static constexpr int R2 = FindCar<my_cell::type, PrevBoard>::X_row_idx;
     static constexpr int C2 = FindCar<my_cell::type, PrevBoard>::X_col_idx;
