@@ -3,6 +3,8 @@
 
 #include "CellType.h"
 #include "Direction.h"
+#include "BoardCell.h"
+#include "TransposeList.h"
 #include "GameBoard.h"
 #include "Utilities.h"
 #include <iostream>

@@ -24,4 +24,30 @@ struct CheckWin{
     constexpr static bool result = CheckWinHelper<redCarRow, redCarColIdx + 1, gameBoard::width - redCarColIdx - 1>::result;
 };
 
+
+template<typename Board, typename moveList>
+struct CheckSolution {
+    //"returns" result: if moveList wins the game
+};
+
+//specialization for GameBoard and List<moves>
+template<typename Board, typename... moves>
+struct CheckSolution<GameBoard<Board>, List<moves...>> {
+    typedef typename List<moves...> list;
+    typedef typename GameBoard<Board> board;
+    typedef typename list::head currMove;
+    constexpr static int currCol = FindCar<currMove::type, board>::X_col_idx;
+    constexpr static int currRow = FindCar<currMove::type, board>::X_row_idx;
+    constexpr static Direction currDirection = currMove::direction;
+    constexpr static int currSteps = currMove::amount;
+    typedef typename moveVehicle<board, currRow, currCol, currDirection, currSteps>::board currBoard;
+    //after first move in the list
+    constexpr static bool result = CheckSolution<currBoard, list::next>::result;
+};
+
+template<typename Board>
+struct CheckSolution<GameBoard<Board>, List<>> {
+    constexpr static bool result = CheckWin<GameBoard<Board>>::result;
+};
+
 #endif // RUSHHOUR_H
