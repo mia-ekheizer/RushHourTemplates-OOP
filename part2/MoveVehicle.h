@@ -28,12 +28,12 @@ struct Find_Car_Helper{
 
     static_assert(!(!found && last_cell_in_board), "Type was not found!");
 
-    static constexpr int next_row = ConditionalInteger<last_row, 0, curr_row + 1>; // this is the next cell's row
+    static constexpr int next_row = ConditionalInteger<last_row, 0, curr_row + 1>::value; // this is the next cell's row
      
-    static constexpr int next_col = ConditionalInteger<last_row, curr_col - 1, curr_col>; // this is the next cell's column
+    static constexpr int next_col = ConditionalInteger<last_row, curr_col - 1, curr_col>::value; // this is the next cell's column
 
-    typedef typename GetAtIndex<next_row, mainList> next_row_list;
-    typedef typename GetAtIndex<next_col, next_row_list> next_cell;
+    typedef typename GetAtIndex<next_row, mainList>::value next_row_list;
+    typedef typename GetAtIndex<next_col, next_row_list>::value next_cell;
     typedef Find_Car_Helper<type, next_cell::type, next_row, next_col, found, mainList> next_helper;
 
     static constexpr int X_row = ConditionalInteger<found, curr_row, next_helper::X_row >::value;
@@ -42,7 +42,10 @@ struct Find_Car_Helper{
 
 // Find_Car_Helper Specialization - stopping condition
 template <CellType type, CellType curr_type, int curr_row, int curr_col, typename board_main_list>
-struct Find_Car_Helper<type, curr_type, curr_row, curr_col, true, board_main_list> {};
+struct Find_Car_Helper<type, curr_type, curr_row, curr_col, true, board_main_list> {
+    constexpr static int X_col = curr_col;
+    constexpr static int X_row = curr_row;
+};
 
 // FindCar Class Declaration
 // (uses Find_Car_Helper to find car "type" in board "Board" - read Find_Car_Helper for more info)
@@ -50,14 +53,16 @@ template<CellType type, typename Board>
 struct FindCar{
     typedef Board game_board;
     typedef typename game_board::board mainList;
-    static constexpr int last_col_idx = mainList::head::size - 1;
+    typedef typename GetAtIndex<0, mainList>::value subList;
+    static constexpr int last_col_idx = subList::size - 1;
 
-    typedef typename GetAtIndex<last_col_idx, mainList::head> first_cell;
+    typedef typename GetAtIndex<last_col_idx, subList>::value first_cell;
 
-    typedef Find_Car_Helper<type, first_cell::type, 0, last_col_idx, false, mainList> car_loc;
+    typedef typename Find_Car_Helper<type, first_cell::type, 0, last_col_idx, false, mainList>::next_helper car_loc;
     static constexpr int X_row_idx = car_loc::X_row;
     static constexpr int X_col_idx = car_loc::X_col;
-};
+    };
+
 
 // Dir Class Declaration
 // This class computes the further end of a car respect to "car_direction" given the end found using FindCar.
@@ -83,7 +88,7 @@ struct Dir<LEFT, Row, Col, len> {
 
 template<int Row, int Col, int len>
 struct Dir<UP, Row, Col, len> {
-    static constexpr int row_i = Row - len + 1;
+    static constexpr int row_i = Row + len - 1;
     static constexpr int col_i = Col;
 };
 
@@ -107,68 +112,58 @@ struct direct{};
 template<int counter, typename mainBoardList, typename car_cell, int Col, int Row>
 struct direct<RIGHT, counter, mainBoardList, car_cell, Col, Row>{
     typedef typename direct<RIGHT, counter - 1, mainBoardList, car_cell, Col, Row>::moved mainList; // main list of the board after we moved the car "count"-1 steps
-    typedef GetAtIndex<Row, mainList> subList;
-    
-    //dest_cell_front is of kind BoardCell
+    typedef typename GetAtIndex<Row, mainList>::value subList;
     // this is the closer end (respect to "d") after the #"count" step
-    typedef typename GetAtIndex<Col + counter + car_cell::length, subList>::value destCellFront;
-    
-    //src_cell_back is of kind BoardCell
-    // this is the further end (respect to "d") before the #"count" step (after the #("count"-1) step)
-    typedef typename GetAtIndex<Col + counter - 1, subList>::value srcCellBack;
-
+    typedef typename GetAtIndex<Col + counter + car_cell::length - 1, subList>::value destCellFront;
     static_assert(destCellFront::type == EMPTY, "Error, Collision cell MoveVehicle");
-    
-    constexpr srcCellBack::type = EMPTY; // TODO: can we do this?
-
-    typedef typename SetAtIndex<Col + counter - 1, srcCellBack, subList> subListAfterRemovingBack; // sublist after changing left end
-    typedef typename SetAtIndex<Col + counter + car_cell::length, car_cell, subListAfterRemovingBack> subListAfterMovingFront; // sublist after changing right end
-    typedef typename SetAtIndex<Row, subListAfterMove, mainList>::list boardAfterMove;
+    typedef BoardCell<EMPTY, UP, 0> emptyCell;
+    typedef typename SetAtIndex<Col + counter - 1, emptyCell, subList>::list subListAfterRemovingBack; // sublist after changing left end
+    typedef typename SetAtIndex<Col + counter + car_cell::length - 1, car_cell, subListAfterRemovingBack>::list subListAfterMovingFront; // sublist after changing right end
+    typedef typename SetAtIndex<Row, subListAfterMovingFront, mainList>::list boardAfterMove;
     typedef boardAfterMove moved;
 };
 
 // direct Specialization - stop condition
 template<typename mainBoardList, typename car_cell, int Col, int Row>
-struct direct<RIGHT, 0, mainBoardList, car_cell, Col, Row> {};
+struct direct<RIGHT, 0, mainBoardList, car_cell, Col, Row> {
+    typedef mainBoardList moved;
+};
 
 template<int counter, typename mainBoardList, typename car_cell, int Col, int Row>
 struct direct<LEFT, counter, mainBoardList, car_cell, Col, Row>{
     typedef typename direct<LEFT, counter - 1, mainBoardList, car_cell, Col, Row>::moved mainList;
-    typedef GetAtIndex<Row, mainList> subList;
-
-    typedef typename GetAtIndex<Col - counter - car_cell::length, subList>::value destCellFront;
-    typedef typename GetAtIndex<Col - counter + 1, subList>::value srcCellBack;
-
-    staic_assert(destCellFront::type == EMPTY, "Error, Collision cell MoveVehicle");
-
-    constexpr srcCellBack::type = EMPTY; // TODO: can we do this?
-
-    typedef typename SetAtIndex<Col - counter + 1, srcCellBack, subList> subListAfterRemovingBack;
-    typedef typename SetAtIndex<Col - counter - car_cell::length, car_cell, subListAfterRemovingBack> subListAfterMovingFront;
-    typedef typename SetAtIndex<Row, subListAfterMove, mainList>::list boardAfterMove;
+    typedef typename GetAtIndex<Row, mainList>::value subList;
+    typedef typename GetAtIndex<Col - counter - car_cell::length + 1, subList>::value destCellFront;
+    static_assert(destCellFront::type == EMPTY, "Error, Collision cell MoveVehicle");
+    typedef BoardCell<EMPTY, UP, 0> emptyCell;
+    typedef typename SetAtIndex<Col - counter + 1, emptyCell, subList>::list subListAfterRemovingBack;
+    typedef typename SetAtIndex<Col - counter - car_cell::length + 1, car_cell, subListAfterRemovingBack>::list subListAfterMovingFront;
+    typedef typename SetAtIndex<Row, subListAfterMovingFront, mainList>::list boardAfterMove;
     typedef boardAfterMove moved;
 };
 
 template<typename mainBoardList, typename car_cell, int Col, int Row>
-struct direct<LEFT, 0, mainBoardList, car_cell, Col, Row> {};
+struct direct<LEFT, 0, mainBoardList, car_cell, Col, Row> {
+    typedef mainBoardList moved;
+};
 
 template<int counter, typename mainBoardList, typename car_cell, int Col, int Row>
 struct direct<UP, counter, mainBoardList, car_cell, Col, Row>{
-    typedef typename Tranpose<mainBoardList>::matrix transposedBoard;
+    typedef typename Transpose<mainBoardList>::matrix transposedBoard;
     typedef typename direct<LEFT, counter, transposedBoard, car_cell, Row, Col>::moved transposedBoardAfterMove;
-    typedef typename Tranpose<transposedBoardAfterMove>::matrix moved;
+    typedef typename Transpose<transposedBoardAfterMove>::matrix moved;
 };
 
 template<int counter, typename mainBoardList, typename car_cell, int Col, int Row>
 struct direct<DOWN, counter, mainBoardList, car_cell, Col, Row>{
-    typedef typename Tranpose<mainBoardList>::matrix transposedBoard;
+    typedef typename Transpose<mainBoardList>::matrix transposedBoard;
     typedef typename direct<RIGHT, counter, transposedBoard, car_cell, Row, Col>::moved transposedBoardAfterMove;
-    typedef typename Tranpose<transposedBoardAfterMove>::matrix moved;
+    typedef typename Transpose<transposedBoardAfterMove>::matrix moved;
 };
 
 template<CellType Type, Direction Dir, int Amount>
 struct Move {
-    static_assert(type != EMPTY, "cannot move an EMPTY cell!");
+    static_assert(Type != EMPTY, "cannot move an EMPTY cell!");
     constexpr static CellType type = Type;
     constexpr static Direction direction = Dir;
     constexpr static int amount = Amount;

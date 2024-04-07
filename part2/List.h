@@ -30,18 +30,20 @@ struct PrependList<Type, List<TypeList...>> {
 template<int N, typename TypeList>
 struct GetAtIndex {};
 
-// recursion for N > 0
-template<int N, typename TypeHead, typename... TypeList>
-struct GetAtIndex<N, List<TypeHead, TypeList...>> {
-    typedef typename GetAtIndex<N - 1, List<TypeList...>>::value value;  
-};
-
 // Specialization for N = 0
 // This is the base case for the recursion
 template<typename TypeHead, typename... TypeList>
 struct GetAtIndex<0, List<TypeHead, TypeList...>> {
     typedef TypeHead value;
 };
+
+// recursion for N > 0
+template<int N, typename TypeHead, typename... TypeList>
+struct GetAtIndex<N, List<TypeHead, TypeList...>> {
+    typedef typename GetAtIndex<N - 1, List<TypeList...>>::value value;  
+};
+
+
 
 /*************            SetAtIndex             ****************/
 // declaration of the general case
@@ -52,7 +54,7 @@ struct SetAtIndex {};
 template<int N ,typename Type, typename TypeHead, typename... TypeList>
 struct SetAtIndex<N, Type, List<TypeHead, TypeList...>> {
     typedef typename SetAtIndex<N - 1, Type, List<TypeList...>>::list tmp_list;
-    typedef typename PrependList<TypeHead, tmp_list> list;
+    typedef typename PrependList<TypeHead, tmp_list>::list list;
 };
 
 // Specialization for N = 0
