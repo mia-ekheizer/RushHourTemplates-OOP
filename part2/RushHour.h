@@ -1,8 +1,16 @@
 #ifndef RUSHHOUR_H
 #define RUSHHOUR_H
 
-#include "MoveVehicle.h"
+#include "BoardCell.h"
+#include "CellType.h"
+#include "Direction.h"
 #include "GameBoard.h"
+#include "List.h"
+#include "MoveVehicle.h"
+#include "Printer.h"
+#include "TransposeList.h"
+#include "Utilities.h"
+
 
 template <typename RowList, int Col, int Counter>
 struct CheckWinHelper {

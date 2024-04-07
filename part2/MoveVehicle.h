@@ -7,8 +7,6 @@
 #include "TransposeList.h"
 #include "GameBoard.h"
 #include "Utilities.h"
-#include <iostream>
-#include "Printer.h"
 
 
 using namespace std;
