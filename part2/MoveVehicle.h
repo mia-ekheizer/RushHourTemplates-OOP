@@ -183,7 +183,7 @@ struct MoveVehicle<GameBoard<B>, R1, C1, Dl, A>{
     typedef GetAtIndex<C1, typename subList::value> cell;
     typedef typename cell::value my_cell; //my_cell is of kind BoardCell
 
-    static_assert(R1 >= 0 && R1 < PrevBoard::height, "Error Row,Move");
+    static_assert(R1 >= 0 && R1 < PrevBoard::length, "Error Row,Move");
     static_assert(C1 >=0 && C1 < PrevBoard::width, "Error column,Move");
     static_assert(my_cell::type != EMPTY, "Error,empty cell MoveVehicle");
     constexpr static bool is_horizontal = ((Dl == RIGHT || Dl == LEFT) && (my_cell::direction == RIGHT || my_cell::direction == LEFT));

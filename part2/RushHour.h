@@ -12,7 +12,6 @@
 #include "Utilities.h"
 #include <iostream>
 
-
 template <typename RowList, int Col, int Counter>
 struct CheckWinHelper {
     constexpr static bool tmp = CheckWinHelper<RowList, Col + 1, Counter - 1>::result;
@@ -21,12 +20,12 @@ struct CheckWinHelper {
 
 template <typename RowList, int Col>
 struct CheckWinHelper<RowList, Col, 0> {
-    constexpr static bool result = (typename GetAtIndex<Col, RowList>::value == EMPTY);
+    constexpr static bool result = true;
 };
 
 template <typename Board>
 struct CheckWin{
-    typedef GameBoard<Board> gameBoard;
+    typedef Board gameBoard;
     constexpr static int redCarColIdx = FindCar<X, gameBoard>::X_col_idx;
     constexpr static int redCarRowIdx = FindCar<X, gameBoard>::X_row_idx;
     typedef typename GetAtIndex<redCarRowIdx, typename gameBoard::board>::value redCarRow;
@@ -38,9 +37,9 @@ struct CheckSolution {};
 
 //specialization for GameBoard and List<moves>
 template<typename Board, typename currMove, typename... moves>
-struct CheckSolution<GameBoard<Board>, List<currMove, moves...>> {
+struct CheckSolution<Board, List<currMove, moves...>> {
     typedef List<moves...> list;
-    typedef GameBoard<Board> mainBoard;
+    typedef Board mainBoard;
     constexpr static int currCol = FindCar<currMove::type, mainBoard>::X_col_idx;
     constexpr static int currRow = FindCar<currMove::type, mainBoard>::X_row_idx;
     constexpr static Direction currDirection = currMove::direction;
@@ -51,7 +50,7 @@ struct CheckSolution<GameBoard<Board>, List<currMove, moves...>> {
 };
 
 template<typename Board>
-struct CheckSolution<GameBoard<Board>, List<>> {
+struct CheckSolution<Board, List<>> {
     constexpr static bool result = CheckWin<Board>::result;
 };
 
