@@ -36,8 +36,8 @@ struct Find_Car_Helper{
     typedef typename GetAtIndex<next_col, next_row_list>::value next_cell;
     typedef Find_Car_Helper<type, next_cell::type, next_row, next_col, found, mainList> next_helper;
 
-    static constexpr int X_row = ConditionalInteger<found, curr_row, next_helper::X_row >::value;
-    static constexpr int X_col = ConditionalInteger<found, curr_col, next_helper::X_col >::value;
+    static constexpr int X_row = ConditionalInteger<found, curr_row, next_helper::X_row>::value;
+    static constexpr int X_col = ConditionalInteger<found, curr_col, next_helper::X_col>::value;
 };
 
 // Find_Car_Helper Specialization - stopping condition

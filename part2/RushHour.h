@@ -7,10 +7,7 @@
 #include "GameBoard.h"
 #include "List.h"
 #include "MoveVehicle.h"
-#include "Printer.h"
-#include "TransposeList.h"
 #include "Utilities.h"
-#include <iostream>
 
 template <typename RowList, int Col, int Counter>
 struct CheckWinHelper {
@@ -35,6 +32,11 @@ struct CheckWin{
 template<typename Board, typename moveList>
 struct CheckSolution {};
 
+template<typename Board>
+struct CheckSolution<Board, List<>> {
+    constexpr static bool result = CheckWin<Board>::result;
+};
+
 //specialization for GameBoard and List<moves>
 template<typename Board, typename currMove, typename... moves>
 struct CheckSolution<Board, List<currMove, moves...>> {
@@ -47,11 +49,6 @@ struct CheckSolution<Board, List<currMove, moves...>> {
     typedef typename MoveVehicle<Board, currRow, currCol, currDirection, currSteps>::board currBoard;
     //after first move in the list
     constexpr static bool result = CheckSolution<currBoard, list>::result;
-};
-
-template<typename Board>
-struct CheckSolution<Board, List<>> {
-    constexpr static bool result = CheckWin<Board>::result;
 };
 
 #endif // RUSHHOUR_H
