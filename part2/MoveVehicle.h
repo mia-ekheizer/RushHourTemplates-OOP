@@ -30,10 +30,13 @@ struct Find_Car_Helper{
 
     static constexpr int next_row = ConditionalInteger<last_row, 0, curr_row + 1>::value; // this is the next cell's row
      
-    static constexpr int next_col = ConditionalInteger<last_row, curr_col - 1, curr_col>::value; // this is the next cell's column
+    static constexpr int next_col1 = ConditionalInteger<last_row, curr_col - 1, curr_col>::value; // this is the next cell's column
+
+    //delete
+    static constexpr int next_col = ConditionalInteger<last_cell_in_board, 0, next_col1>::value;
 
     typedef typename GetAtIndex<next_row, mainList>::value next_row_list;
-    typedef typename GetAtIndex<next_col, next_row_list>::value next_cell;
+    typedef typename Conditional<last_cell_in_board, BoardCell<EMPTY, UP, 0>, typename GetAtIndex<next_col, next_row_list>::value>::value next_cell;
     typedef Find_Car_Helper<type, next_cell::type, next_row, next_col, found, mainList> next_helper;
 
     static constexpr int X_row = ConditionalInteger<found, curr_row, next_helper::X_row>::value;
