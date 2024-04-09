@@ -23,7 +23,6 @@ void testRushHour(){
             Move < B, UP, 1 > , Move < C, LEFT, 4 > , Move < A, LEFT, 2 > , Move < X, LEFT, 2 > , Move < B, UP, 3 > , Move < P, LEFT, 3 > , Move < O, DOWN, 1 >
     > badMoves;
 
-        /*
     typedef GameBoard< List<
             List < BoardCell< EMPTY , RIGHT , 0 >, BoardCell< EMPTY , RIGHT , 0 >, BoardCell< EMPTY , RIGHT , 0>, BoardCell< X , RIGHT , 1 >, BoardCell< EMPTY , RIGHT , 0>, BoardCell< EMPTY , RIGHT , 0>, BoardCell< EMPTY , RIGHT , 0>>
     >> solvedBoard;
@@ -38,10 +37,6 @@ void testRushHour(){
     static_assert(CheckSolution<solvedBoard, List<Move < X, RIGHT, 1 >>>::result == true, "Fail 4");
     static_assert(CheckSolution<solvedBoard, List<Move < X, LEFT, 3 >>>::result == true, "Fail 4");
     static_assert(CheckSolution<solvedBoard, List<>>::result == true, "Fail 4");
-    */
-   typedef GameBoard< List<
-            List < BoardCell< EMPTY , UP , 0 >, BoardCell< EMPTY , UP , 0 >, BoardCell< EMPTY , UP , 0>, BoardCell< X , UP , 1 >, BoardCell< EMPTY , UP , 0>, BoardCell< EMPTY , UP , 0>, BoardCell< X , RIGHT , 1>>
-    >> solvedBoard;
-    static_assert(CheckSolution<solvedBoard, List<>>::result == true, "Fail 4");
+    static_assert(CheckSolution<solvedBoard, List<Move < X, RIGHT, 3 >>>::result == true, "Fail 4");
 }
 #endif //OOP_HW5_RUSHHOURTEST_H

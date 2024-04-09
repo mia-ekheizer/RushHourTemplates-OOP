@@ -22,19 +22,12 @@ template <CellType type, CellType curr_type, int curr_row, int curr_col, bool do
 struct Find_Car_Helper{
     typedef typename GameBoard<board_main_list>::board mainList;
     static constexpr bool last_row = (mainList::size == curr_row + 1);
-
     static constexpr bool found = (curr_type == type);
     static constexpr bool last_cell_in_board = (last_row && (curr_col == 0));
-
     static_assert(!(!found && last_cell_in_board), "Type was not found!");
-
     static constexpr int next_row = ConditionalInteger<last_row, 0, curr_row + 1>::value; // this is the next cell's row
-     
     static constexpr int next_col1 = ConditionalInteger<last_row, curr_col - 1, curr_col>::value; // this is the next cell's column
-
-    //delete
     static constexpr int next_col = ConditionalInteger<last_cell_in_board, 0, next_col1>::value;
-
     typedef typename GetAtIndex<next_row, mainList>::value next_row_list;
     typedef typename Conditional<last_cell_in_board, BoardCell<EMPTY, UP, 0>, typename GetAtIndex<next_col, next_row_list>::value>::value next_cell;
     typedef Find_Car_Helper<type, next_cell::type, next_row, next_col, found, mainList> next_helper;
@@ -57,15 +50,13 @@ struct FindCar{
     typedef Board game_board;
     typedef typename game_board::board mainList;
     typedef typename GetAtIndex<0, mainList>::value subList;
-    static constexpr int last_col_idx = subList::size - 1;
-
+    static constexpr int last_col_idx = game_board::width - 1;
+    // width is changing for some reason...
     typedef typename GetAtIndex<last_col_idx, subList>::value first_cell;
-
     typedef typename Find_Car_Helper<type, first_cell::type, 0, last_col_idx, false, mainList>::next_helper car_loc;
     static constexpr int X_row_idx = car_loc::X_row;
     static constexpr int X_col_idx = car_loc::X_col;
-    };
-
+};
 
 // Dir Class Declaration
 // This class computes the further end of a car respect to "car_direction" given the end found using FindCar.
