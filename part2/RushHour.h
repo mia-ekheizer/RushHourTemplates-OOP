@@ -35,11 +35,13 @@ struct CheckSolution {};
 template<typename Board>
 struct CheckSolution<Board, List<>> {
     constexpr static bool result = CheckWin<Board>::result;
+    //static_assert(1==2, "should be here");
 };
 
 //specialization for GameBoard and List<moves>
 template<typename Board, typename currMove, typename... moves>
 struct CheckSolution<Board, List<currMove, moves...>> {
+    //static_assert(1==2, "should NOT be here");
     typedef List<moves...> list;
     typedef Board mainBoard;
     constexpr static int currCol = FindCar<currMove::type, mainBoard>::X_col_idx;

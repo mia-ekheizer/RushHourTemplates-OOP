@@ -3,7 +3,7 @@
 
 #include "List.h"
 
-template<typename>
+template<typename TypeList>
 struct GameBoard {};
 
 template<typename... TypeList>

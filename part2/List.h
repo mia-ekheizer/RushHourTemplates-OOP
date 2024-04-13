@@ -53,15 +53,14 @@ struct SetAtIndex {};
 // recursion for N > 0
 template<int N ,typename Type, typename TypeHead, typename... TypeList>
 struct SetAtIndex<N, Type, List<TypeHead, TypeList...>> {
-    typedef typename SetAtIndex<N - 1, Type, List<TypeList...>>::list tmp_list;
-    typedef typename PrependList<TypeHead, tmp_list>::list list;
+    typedef typename PrependList<TypeHead, typename SetAtIndex<N - 1, Type, List<TypeList...>>::list>::list list;
 };
 
 // Specialization for N = 0
 // Changing the value in the Nth node
 template<typename Type, typename TypeHead, typename... TypeList>
 struct SetAtIndex<0, Type, List<TypeHead, TypeList...>> {
-    typedef typename PrependList<Type, List<TypeList...>>::list list;
+    typedef List<Type, TypeList...> list;
 };
 
 #endif // LIST_H

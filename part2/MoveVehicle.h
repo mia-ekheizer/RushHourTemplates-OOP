@@ -11,6 +11,17 @@
 
 using namespace std;
 
+/***************************   MOVE   **************************/
+template<CellType Type, Direction Dir, int Amount>
+struct Move {
+    static_assert(Type != EMPTY, "cannot move an EMPTY cell!");
+    constexpr static CellType type = Type;
+    constexpr static Direction direction = Dir;
+    constexpr static int amount = Amount;
+};
+
+
+
 // Find_Car_Helper Class Declaration
 // This class recursively iterates over the board's cells and finds the coordinates of a cell containing an end (the front or back) of the car "type" (note that the first end to be found depends on the direction of the search).
 // type - the car to find
@@ -20,7 +31,7 @@ using namespace std;
 // board_main_list - main list of the board
 template <CellType type, CellType curr_type, int curr_row, int curr_col, bool done, typename board_main_list> 
 struct Find_Car_Helper{
-    typedef typename GameBoard<board_main_list>::board mainList;
+    typedef board_main_list mainList;
     static constexpr bool last_row = (mainList::size == curr_row + 1);
     static constexpr bool found = (curr_type == type);
     static constexpr bool last_cell_in_board = (last_row && (curr_col == 0));
@@ -49,11 +60,13 @@ template<CellType type, typename Board>
 struct FindCar{
     typedef Board game_board;
     typedef typename game_board::board mainList;
-    typedef typename GetAtIndex<0, mainList>::value subList;
+    typedef typename GetAtIndex<0, mainList>::value subList; //first row of the board
     static constexpr int last_col_idx = game_board::width - 1;
-    // width is changing for some reason...
-    typedef typename GetAtIndex<last_col_idx, subList>::value first_cell;
-    typedef typename Find_Car_Helper<type, first_cell::type, 0, last_col_idx, false, mainList>::next_helper car_loc;
+    typedef typename GetAtIndex<last_col_idx, subList>::value first_cell; //top right cell
+
+    // TODO: do I need "next_helper" or just the find_car_helper?
+    // was ::next_helper car_loc, changed to car_loc
+    typedef Find_Car_Helper<type, first_cell::type, 0, last_col_idx, false, mainList> car_loc;
     static constexpr int X_row_idx = car_loc::X_row;
     static constexpr int X_col_idx = car_loc::X_col;
 };
@@ -155,13 +168,6 @@ struct direct<DOWN, counter, mainBoardList, car_cell, Col, Row>{
     typedef typename Transpose<transposedBoardAfterMove>::matrix moved;
 };
 
-template<CellType Type, Direction Dir, int Amount>
-struct Move {
-    static_assert(Type != EMPTY, "cannot move an EMPTY cell!");
-    constexpr static CellType type = Type;
-    constexpr static Direction direction = Dir;
-    constexpr static int amount = Amount;
-};
 
 // MoveVehicle Class Declaration
 template<typename gameBoard, int R, int C, Direction D, int A>
